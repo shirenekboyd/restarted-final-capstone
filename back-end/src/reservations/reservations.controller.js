@@ -1,7 +1,6 @@
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
-
 /**
  * List handler for reservation resources
  */
@@ -45,31 +44,54 @@ function validationReservation(req, res, next) {
     }
   });
   if (!Number.isInteger(data.people)) {
-    next({
+    return next({
       status: 400,
       message: "people must be a number",
     });
-}
-
+  }
 
   /**
- * D a t e   Validation
- */
+   * D a t e   Validation
+   */
   const dateFormat = /\d\d\d\d-\d\d-\d\d/;
   const timeFormat = /\d\d:\d\d/;
   if (!data.reservation_date.match(dateFormat)) {
-    next({
+    return next({
       status: 400,
       message: "reservation_date must be a date",
     });
   }
   if (!data.reservation_time.match(timeFormat)) {
-    next({
+    return next({
       status: 400,
       message: "reservation_time must be a time",
     });
   }
-  next();
+  /**
+   * US-02 Tuesday Validation and Past Date Validation
+   */
+  let tuesdayCheck = new Date(data.reservation_date);
+  tuesdayCheck = tuesdayCheck.getUTCDay();
+  //console.log("date", tuesdayCheck)
+  if (tuesdayCheck === 2) {
+    return next({
+      status: 400,
+      message:
+        "reservation_date cannot be Tuesday when the restaurant is closed",
+    });
+  }
+
+  let now = new Date();
+  let reservationDateTime = new Date(
+    `${data.reservation_date}T${data.reservation_time}`
+  );
+  if (reservationDateTime < now) {
+    return next({
+      status: 400,
+      message: "reservation_date must be in the future",
+    });
+  }
+  return next();
 }
 
 module.exports = {
