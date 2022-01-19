@@ -70,6 +70,16 @@ function validationReservation(req, res, next) {
     });
   }
   next();
+
+
+//let tuesdayCheck = new Date();
+if (data.reservation_date.getDate() === 3){
+  next({
+    status: 400,
+    message: "reservation_date cannot be Tuesday"
+  })
+
+  }
 }
 
 module.exports = {
