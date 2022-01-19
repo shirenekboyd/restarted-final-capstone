@@ -1,41 +1,36 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { today } from "../utils/date-time";
-//---may need to import function here from utils/api-----//
 import { createReservation } from "../utils/api";
 import ErrorAlert from "./ErrorAlert";
-
-export default function Form() {
-  let initialState = {
-    first_name: "",
-    last_name: "",
-    mobile_number: "",
-    reservation_time: "",
-    reservation_date: today(),
-    people: "1",
+function Form() {
+  const initialState = {
+    "first_name": "",
+    "last_name": "",
+    "mobile_number": "",
+    "reservation_date": "",
+    "reservation_time": "",
+    "people": 0,
   };
-
-  const [reservation, setReservation] = useState(initialState);
   const history = useHistory();
-  const [error, setError] = useState(false)
-
+  const [error, setError] = useState(null);
+  const [reservation, setReservation] = useState(initialState);
   function changeHandler({ target: { name, value } }) {
     setReservation((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   }
-
-  function submitHandler(evt) {
+  function submitHandler(e) {
+    console.log(reservation)
     reservation.people = Number(reservation.people)
-    evt.preventDefault();
+    e.preventDefault();
     let abortController = new AbortController();
     async function newReservation() {
       try {
-        await createReservation(reservation, abortController.signal);
-        let date = reservation.reservation_date;
-        setReservation(initialState);
-        history.push(`/dashboard?date=${date}`);
+        await createReservation(reservation, abortController.signal)
+        let date = reservation.reservation_date
+        setReservation(initialState)
+        history.push(`/dashboard?date=${date}`)
       } catch (error) {
         setError(error);
       }
@@ -43,131 +38,136 @@ export default function Form() {
     newReservation();
     return () => {
       abortController.abort();
-    }
+    };
   }
-
-  //form tag info needs to be in a new component so it can be reusable; see flashcard app
-
   return (
-    <>
-      <h1>Create Reservation</h1>
+    <div>
       <ErrorAlert error={error} />
-      <form onSubmit={submitHandler}>
-        <div className="row">
-          <div>
-            <div className="col">
-              <label htmlFor="first_name" className="form-label">
-                First Name
-              </label>
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                className="form-control"
-                placeholder="First Name"
-                aria-label="First Name"
-                value={reservation.first_name}
-                onChange={changeHandler}
-              />
-            </div>
+      <form className="form w-full max-w-lg"  onSubmit={(e) => submitHandler(e)}>
+        <div className="flex flex-wrap mx-3 mb-6">
+          <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-first-name"
+            >
+              First Name
+            </label>
+            <input
+              name="first_name"
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+              id="first-name"
+              type="text"
+              value={reservation.first_name}
+              placeholder="First Name"
+              onChange={(e) => changeHandler(e)}
+            />
+            <p className="text-red-500 text-xs italic">
+              Please fill out this field.
+            </p>
           </div>
-          <div className="col">
-            <label htmlFor="last_name" className="form-label">
+          <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-last-name"
+            >
               Last Name
             </label>
             <input
-              type="text"
               name="last_name"
-              className="form-control"
-              placeholder="Last Name"
-              aria-label="Last Name"
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="last-name"
+              type="text"
               value={reservation.last_name}
-              onChange={changeHandler}
+              placeholder="Last Name"
+              onChange={(e) => changeHandler(e)}
             />
           </div>
-          <div>
-            <div className="col">
-              <label htmlFor="mobile_number" className="form-label">
-                Mobile Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="mobile_number"
-                className="form-control"
-                placeholder="Mobile Number"
-                aria-label="Mobile Number"
-                value={reservation.mobile_number}
-                onChange={changeHandler}
-              />
-            </div>
+        </div>
+        <div className="flex flex-wrap mx-3 mb-6">
+          <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-mobile-number"
+            >
+              Mobile Number
+            </label>
+            <input
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+              placeholder="000-000-0000"
+              name="mobile_number"
+              type="tel"
+              id="mobile_number"
+              value={reservation.mobile_number}
+              onChange={(e) => changeHandler(e)}
+            />
+            <p className="text-gray-600 text-xs italic">
+              Please use the format 000-000-0000{" "}
+            </p>
+          </div>
+          <div className="w-full md:w-1/2 px-3">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-mobile-people"
+            >
+              Party Size
+            </label>
+            <input
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+              name="people"
+              id="people"
+              type="number"
+              min="0"
+              value={reservation.people}
+              placeholder="1"
+              onChange={(e) => changeHandler(e)}
+            />
           </div>
         </div>
-
-        <div className="row">
-          <div>
-            <div className="col">
-              <label htmlFor="reservation_date" className="form-label">
-                Date
-              </label>
-              <input
-                type="date"
-                id="reservation_date"
-                name="reservation_date"
-                className="form-control"
-                placeholder="Date"
-                aria-label="Date"
-                value={reservation.reservation_date}
-                onChange={changeHandler}
-              />
-            </div>
+        <div className="flex flex-wrap mx-3 mb-2">
+          <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-reservation-date"
+            >
+              Reservation Date
+            </label>
+            <input
+              name="reservation_date"
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="date"
+              type="date"
+              value={reservation.reservation_date}
+              onChange={(e) => changeHandler(e)}
+            />
           </div>
-          <div>
-            <div className="col">
-              <label htmlFor="reservation_time" className="form-label">
-                Time
-              </label>
-              <input
-                type="time"
-                id="reservation_time"
-                name="reservation_time"
-                className="form-control"
-                placeholder="Time"
-                aria-label="Time"
-                value={reservation.reservation_time}
-                onChange={changeHandler}
-              />
-            </div>
-          </div>
-          <div>
-            <div className="col">
-              <label htmlFor="people" className="form-label">
-                People
-              </label>
-              <input
-                type="number"
-                id="people"
-                name="people"
-                min="1"
-                className="form-control"
-                aria-label="People"
-                value={reservation.people}
-                onChange={changeHandler}
-              />
-            </div>
+          <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="grid-reservation-time"
+            >
+              Reservation Time
+            </label>
+            <input
+              name="reservation_time"
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="time"
+              type="time"
+              value={reservation.reservation_time}
+              onChange={(e) => changeHandler(e)}
+            />
           </div>
         </div>
-        {/*Cancel button when clicked returns the user to the previous page */}
-        <button
-          onClick={() => history.goBack()}
-          type="button"
-          className="btn btn-secondary m-2"
-        >
-          Cancel
-        </button>
-        {/*Submit button when clicked saves the new reservation, then displays the /dashboard page for the date of the new reservation */}
-        <button className="btn btn-primary" type="submit">Submit</button>
+      <button
+        className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+        type="submit"
+      >
+        Submit
+      </button>
+      <button type="button" onClick={(e) => history.goBack()}>
+        Cancel
+      </button>
       </form>
-    </>
+    </div>
   );
 }
+export default Form;

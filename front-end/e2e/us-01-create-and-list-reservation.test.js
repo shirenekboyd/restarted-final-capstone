@@ -48,8 +48,8 @@ console.log("TEST")
       });
 
       await Promise.all([
+        page.waitForNavigation({ waitUntil: "load" }),
         page.click("[type=submit]"),
-        page.waitForNavigation({ waitUntil: "networkidle0" }),
       ]);
       console.log("TEST")
       await page.screenshot({
