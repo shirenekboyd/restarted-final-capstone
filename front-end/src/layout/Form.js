@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import { today } from "../utils/date-time";
 //---may need to import function here from utils/api-----//
 import { createReservation } from "../utils/api";
+import ErrorAlert from "./ErrorAlert";
 
 export default function Form() {
   let initialState = {
@@ -16,6 +17,7 @@ export default function Form() {
 
   const [reservation, setReservation] = useState(initialState);
   const history = useHistory();
+  const [error, setError] = useState(false)
 
   function changeHandler({ target: { name, value } }) {
     setReservation((prevState) => ({
@@ -30,12 +32,12 @@ export default function Form() {
     let abortController = new AbortController();
     async function newReservation() {
       try {
-        await createReservation(reservation, abortController);
+        await createReservation(reservation, abortController.signal);
         let date = reservation.reservation_date;
         setReservation(initialState);
         history.push(`/dashboard?date=${date}`);
       } catch (error) {
-        console.log(error.message);
+        setError(error);
       }
     }
     newReservation();
@@ -49,6 +51,7 @@ export default function Form() {
   return (
     <>
       <h1>Create Reservation</h1>
+      <ErrorAlert error={error} />
       <form onSubmit={submitHandler}>
         <div className="row">
           <div>
@@ -163,7 +166,7 @@ export default function Form() {
           Cancel
         </button>
         {/*Submit button when clicked saves the new reservation, then displays the /dashboard page for the date of the new reservation */}
-        <input className="btn btn-primary" type="submit" value="Submit"></input>
+        <button className="btn btn-primary" type="submit">Submit</button>
       </form>
     </>
   );
