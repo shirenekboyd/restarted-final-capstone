@@ -2,6 +2,19 @@ const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 /**
+ * Helper Function
+ */
+function asDateString(date) {
+  return `${date.getFullYear().toString(10)}-${(date.getMonth() + 1)
+    .toString(10)
+    .padStart(2, "0")}-${date.getDate().toString(10).padStart(2, "0")}`;
+}
+
+function today() {
+  return asDateString(new Date());
+}
+
+/**
  * List handler for reservation resources
  */
 
@@ -89,6 +102,18 @@ function validationReservation(req, res, next) {
     return next({
       status: 400,
       message: "reservation_date must be in the future",
+    });
+  }
+  /**
+   * US-03 Time of Reservation Validation
+   */
+  const today = new Date();
+  let todayTime = today.getHours() + ":" + today.getMinutes();
+
+  if ("10:30" > data.reservation_time || data.reservation_time > "21:30") {
+    return next({
+      status: 400,
+      message: "reservation_time cannot be before 10:30AM or after 9:30PM",
     });
   }
   return next();
