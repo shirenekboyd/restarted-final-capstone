@@ -21,7 +21,7 @@ function Form() {
     }));
   }
   function submitHandler(e) {
-    console.log(reservation)
+    //console.log(reservation)
     reservation.people = Number(reservation.people)
     e.preventDefault();
     let abortController = new AbortController();

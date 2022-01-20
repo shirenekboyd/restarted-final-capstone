@@ -5,6 +5,7 @@ import Dashboard from "../dashboard/Dashboard";
 import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
 import Form from "./Form";
+import CreateTables from "../tables/CreateTables";
 
 /**
  * Defines all the routes for the application.
@@ -29,6 +30,9 @@ function Routes() {
         <Form />
       </Route>
       <Route>
+      <Route path="/tables/new">
+        <CreateTables />
+      </Route>
         <NotFound />
       </Route>
     </Switch>
