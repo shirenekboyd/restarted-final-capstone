@@ -33,6 +33,9 @@ function Routes() {
       <Route path="/tables/new">
         <CreateTables />
       </Route>
+      <Route path="/reservations/:reservation_id/seat">
+        <CreateTables />
+      </Route>
         <NotFound />
       </Route>
     </Switch>
